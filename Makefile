@@ -15,7 +15,7 @@ GO ?= go
 .PHONY: test gen
 
 test: gen
-	$(GO) test ./...
+	$(GO) test ./... -cover
 
 gen:
 	$(GO) generate ./...

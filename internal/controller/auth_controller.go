@@ -36,7 +36,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.userService.RegisterUser(&req); err != nil {
-		v1.ErrorResponse(w, http.StatusInternalServerError, "User already exists")
+		v1.ErrorResponse(w, http.StatusInternalServerError, "Could not create user")
 		return
 	}
 
