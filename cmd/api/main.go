@@ -10,6 +10,8 @@ import (
 	"github.com/flohansen/auther/internal/controller"
 	"github.com/flohansen/auther/internal/repository"
 	"github.com/flohansen/auther/internal/service"
+
+	_ "github.com/lib/pq"
 )
 
 var (
