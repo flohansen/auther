@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	v1 "github.com/flohansen/auther/api/v1"
@@ -37,4 +38,8 @@ func (s *UserService) RegisterUser(ctx context.Context, req *v1.RegisterRequest)
 		Username:     req.Username,
 		PasswordHash: passwordHash,
 	})
+}
+
+func (s *UserService) LoginUser(ctx context.Context, req *v1.LoginRequest) error {
+	return errors.New("not implemented")
 }

@@ -13,6 +13,7 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, req *v1.RegisterRequest) error
+	LoginUser(ctx context.Context, req *v1.LoginRequest) error
 }
 
 type AuthController struct {
@@ -45,7 +46,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v1.Response(w, "User created")
+	v1.SuccessResponse(w, "User created")
 }
 
 func validateRegisterRequest(req *v1.RegisterRequest) error {
@@ -73,6 +74,17 @@ func validateRegisterRequest(req *v1.RegisterRequest) error {
 }
 
 func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req v1.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		v1.ErrorResponse(w, http.StatusBadRequest, "Request is not a valid json")
+		return
+	}
+
+	if err := c.userService.LoginUser(ctx, &req); err != nil {
+		v1.ErrorResponse(w, http.StatusUnauthorized, "Invalid credentials")
+	}
 }
 
 func (c *AuthController) Update(w http.ResponseWriter, r *http.Request) {

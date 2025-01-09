@@ -5,22 +5,22 @@ import (
 	"net/http"
 )
 
-type ErrorMessage struct {
+type Message struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
 func ErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(ErrorMessage{
+	json.NewEncoder(w).Encode(Message{
 		Success: false,
 		Message: message,
 	})
 }
 
-func Response(w http.ResponseWriter, message string) {
+func SuccessResponse(w http.ResponseWriter, message string) {
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ErrorMessage{
+	json.NewEncoder(w).Encode(Message{
 		Success: true,
 		Message: message,
 	})
