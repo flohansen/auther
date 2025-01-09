@@ -1,0 +1,8 @@
+#!/bin/bash
+
+make test
+
+if [[ $(echo $?) -ne 0 ]]; then
+    echo "Tests failed. Please fix them before pushing."
+    exit 1
+fi

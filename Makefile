@@ -14,6 +14,9 @@ GO ?= go
 
 .PHONY: test gen
 
+setup:
+	cp hack/git/pre-push .git/hooks/pre-push
+
 test: gen
 	$(GO) test ./... -cover
 
