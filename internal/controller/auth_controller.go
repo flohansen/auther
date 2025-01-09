@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 
@@ -39,6 +40,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.userService.RegisterUser(ctx, &req); err != nil {
+		log.Printf("could not register user: %s", err)
 		v1.ErrorResponse(w, http.StatusInternalServerError, "Could not create user")
 		return
 	}

@@ -16,7 +16,7 @@ type PostgresConfig struct {
 }
 
 func (c PostgresConfig) Dsn() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		c.Username, c.Password, c.Host, c.Port, c.Database)
 }
 
