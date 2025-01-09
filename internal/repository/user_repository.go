@@ -3,9 +3,15 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/flohansen/auther/internal/service"
+)
+
+var (
+	ErrUserAlreadyExists = errors.New("user already exists")
 )
 
 type User struct {
@@ -32,5 +38,14 @@ VALUES ($1, $2, $3, $4)
 
 func (u *UserRepository) CreateUser(ctx context.Context, user service.User) error {
 	_, err := u.db.ExecContext(ctx, createUserQuery, user.Username, user.PasswordHash, time.Now(), time.Now())
-	return err
+	if err != nil {
+		switch true {
+		case strings.Contains(err.Error(), `duplicate key value violates unique constraint "users_pkey"`):
+			return ErrUserAlreadyExists
+		default:
+			return err
+		}
+	}
+
+	return nil
 }
