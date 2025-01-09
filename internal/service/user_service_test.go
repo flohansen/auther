@@ -7,7 +7,7 @@ import (
 	v1 "github.com/flohansen/auther/api/v1"
 	"github.com/flohansen/auther/internal/service"
 	"github.com/flohansen/auther/internal/service/mocks"
-	"github.com/flohansen/auther/testhelper"
+	"github.com/flohansen/auther/testhelper/matchers"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -24,9 +24,9 @@ func TestUserService_CreateUser(t *testing.T) {
 		s := service.NewUserService(userRepositoryMock)
 
 		userRepositoryMock.EXPECT().
-			CreateUser(ctx, testhelper.UserMatches(
-				testhelper.Username("username"),
-				testhelper.PasswordHashOf("password"),
+			CreateUser(ctx, matchers.UserMatches(
+				matchers.Username("username"),
+				matchers.PasswordHashOf("password"),
 			)).
 			Return(nil)
 
