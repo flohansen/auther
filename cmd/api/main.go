@@ -17,6 +17,8 @@ var (
 )
 
 func main() {
+	flag.Parse()
+
 	config, err := application.LoadConfig(*configPath)
 	if err != nil {
 		log.Fatalf("could not load config: %s", err)
