@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"context"
 	"testing"
 
 	v1 "github.com/flohansen/auther/api/v1"
@@ -19,17 +20,18 @@ func TestUserService_CreateUser(t *testing.T) {
 
 	t.Run("should hash the password", func(t *testing.T) {
 		// given
+		ctx := context.TODO()
 		s := service.NewUserService(userRepositoryMock)
 
 		userRepositoryMock.EXPECT().
-			CreateUser(testhelper.UserMatches(
+			CreateUser(ctx, testhelper.UserMatches(
 				testhelper.Username("username"),
 				testhelper.PasswordHashOf("password"),
 			)).
 			Return(nil)
 
 		// when
-		err := s.RegisterUser(&v1.RegisterRequest{
+		err := s.RegisterUser(ctx, &v1.RegisterRequest{
 			Username: "username",
 			Password: "password",
 		})

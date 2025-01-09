@@ -93,7 +93,7 @@ func TestAuthController_Register(t *testing.T) {
 		}`)))
 
 		userServiceMock.EXPECT().
-			RegisterUser(&v1.RegisterRequest{
+			RegisterUser(r.Context(), &v1.RegisterRequest{
 				Username: "example@example.com",
 				Password: "tEst!234",
 			}).
@@ -121,7 +121,7 @@ func TestAuthController_Register(t *testing.T) {
 		}`)))
 
 		userServiceMock.EXPECT().
-			RegisterUser(&v1.RegisterRequest{
+			RegisterUser(r.Context(), &v1.RegisterRequest{
 				Username: "example@example.com",
 				Password: "tEst!234",
 			}).

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 )
 
 type UserService interface {
-	RegisterUser(req *v1.RegisterRequest) error
+	RegisterUser(ctx context.Context, req *v1.RegisterRequest) error
 }
 
 type AuthController struct {
@@ -24,6 +25,8 @@ func NewAuthController(userService UserService) *AuthController {
 }
 
 func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var req v1.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		v1.ErrorResponse(w, http.StatusBadRequest, "Request is not a valid json")
@@ -35,7 +38,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.userService.RegisterUser(&req); err != nil {
+	if err := c.userService.RegisterUser(ctx, &req); err != nil {
 		v1.ErrorResponse(w, http.StatusInternalServerError, "Could not create user")
 		return
 	}

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
 	v1 "github.com/flohansen/auther/api/v1"
@@ -13,7 +14,7 @@ type User struct {
 }
 
 type UserRepository interface {
-	CreateUser(user User) error
+	CreateUser(ctx context.Context, user User) error
 }
 
 type UserService struct {
@@ -26,13 +27,13 @@ func NewUserService(repo UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) RegisterUser(req *v1.RegisterRequest) error {
+func (s *UserService) RegisterUser(ctx context.Context, req *v1.RegisterRequest) error {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 	if err != nil {
 		return fmt.Errorf("could not generate hash for password: %w", err)
 	}
 
-	return s.repo.CreateUser(User{
+	return s.repo.CreateUser(ctx, User{
 		Username:     req.Username,
 		PasswordHash: passwordHash,
 	})
