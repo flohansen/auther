@@ -5,13 +5,15 @@ import (
 	"net/http"
 
 	"github.com/flohansen/auther/internal/controller"
+	"github.com/flohansen/auther/internal/repository"
 	"github.com/flohansen/auther/internal/service"
 )
 
 func main() {
 	healthController := controller.NewHealthController()
 
-	userService := service.NewUserService()
+	userRepository := repository.NewUserRepository()
+	userService := service.NewUserService(userRepository)
 	authController := controller.NewAuthController(userService)
 
 	mux := http.NewServeMux()
