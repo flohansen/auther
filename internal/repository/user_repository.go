@@ -49,3 +49,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user service.User) erro
 
 	return nil
 }
+
+func (u *UserRepository) GetUser(ctx context.Context, username string) (service.User, error) {
+	return service.User{}, errors.New("not implemented")
+}

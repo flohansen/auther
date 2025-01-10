@@ -35,9 +35,16 @@ type RegisterResponse struct {
 }
 
 type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	Scope        string `json:"scope,omitempty"`
 }
 
 type UpdateRequest struct {

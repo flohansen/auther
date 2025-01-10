@@ -7,13 +7,20 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"time"
 
 	v1 "github.com/flohansen/auther/api/v1"
 )
 
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    time.Time
+}
+
 type UserService interface {
 	RegisterUser(ctx context.Context, req *v1.RegisterRequest) error
-	LoginUser(ctx context.Context, req *v1.LoginRequest) error
+	Authenticate(ctx context.Context, req *v1.LoginRequest) (Tokens, error)
 }
 
 type AuthController struct {
@@ -82,9 +89,37 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.userService.LoginUser(ctx, &req); err != nil {
-		v1.ErrorResponse(w, http.StatusUnauthorized, "Invalid credentials")
+	if err := validateLoginRequest(&req); err != nil {
+		log.Printf("invalid login request for user '%s': %s", req.Username, err)
+		v1.ErrorResponse(w, http.StatusBadRequest, "Invalid request")
+		return
 	}
+
+	tokens, err := c.userService.Authenticate(ctx, &req)
+	if err != nil {
+		log.Printf("could not authenticate user '%s': %s", req.Username, err)
+		v1.ErrorResponse(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
+
+	json.NewEncoder(w).Encode(v1.LoginResponse{
+		TokenType:    "Bearer",
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+		ExpiresIn:    int(tokens.ExpiresIn.Unix()),
+	})
+}
+
+func validateLoginRequest(req *v1.LoginRequest) error {
+	if len(req.Username) == 0 {
+		return errors.New("username is empty")
+	}
+
+	if len(req.Password) == 0 {
+		return errors.New("password is empty")
+	}
+
+	return nil
 }
 
 func (c *AuthController) Update(w http.ResponseWriter, r *http.Request) {
