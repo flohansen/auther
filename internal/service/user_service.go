@@ -34,9 +34,10 @@ type UserService struct {
 	repo       UserRepository
 }
 
-func NewUserService(repo UserRepository) *UserService {
+func NewUserService(privateKey *ecdsa.PrivateKey, repo UserRepository) *UserService {
 	return &UserService{
-		repo: repo,
+		privateKey: privateKey,
+		repo:       repo,
 	}
 }
 

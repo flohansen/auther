@@ -21,7 +21,7 @@ func TestUserService_CreateUser(t *testing.T) {
 	t.Run("should hash the password", func(t *testing.T) {
 		// given
 		ctx := context.TODO()
-		s := service.NewUserService(userRepositoryMock)
+		s := service.NewUserService(nil, userRepositoryMock)
 
 		userRepositoryMock.EXPECT().
 			CreateUser(ctx, matchers.UserMatches(

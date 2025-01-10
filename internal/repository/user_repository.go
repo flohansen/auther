@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -11,7 +12,8 @@ import (
 )
 
 var (
-	ErrUserAlreadyExists = errors.New("user already exists")
+	ErrAlreadyExists = errors.New("user already exists")
+	ErrNotFound      = errors.New("user not found")
 )
 
 type User struct {
@@ -41,7 +43,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user service.User) erro
 	if err != nil {
 		switch true {
 		case strings.Contains(err.Error(), `duplicate key value violates unique constraint "users_pkey"`):
-			return ErrUserAlreadyExists
+			return ErrAlreadyExists
 		default:
 			return err
 		}
@@ -50,6 +52,35 @@ func (u *UserRepository) CreateUser(ctx context.Context, user service.User) erro
 	return nil
 }
 
+const getUserQuery = `
+SELECT username, password_hash, created_at, last_modified_at
+FROM users
+WHERE username = $1
+LIMIT 1
+`
+
 func (u *UserRepository) GetUser(ctx context.Context, username string) (service.User, error) {
-	return service.User{}, errors.New("not implemented")
+	row := u.db.QueryRowContext(ctx, getUserQuery, username)
+	if err := row.Err(); err != nil {
+		return service.User{}, fmt.Errorf("query error: %w", err)
+	}
+
+	var user User
+	if err := row.Scan(
+		&user.Username,
+		&user.PasswordHash,
+		&user.CreatedAt,
+		&user.LastModifiedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return service.User{}, ErrNotFound
+		}
+
+		return service.User{}, fmt.Errorf("could not scan user row: %w", err)
+	}
+
+	return service.User{
+		Username:     user.Username,
+		PasswordHash: user.PasswordHash,
+	}, nil
 }
