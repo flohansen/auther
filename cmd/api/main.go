@@ -21,9 +21,7 @@ import (
 )
 
 var (
-	configPath     = flag.String("config", "auther.config.yaml", "The path to the configuration file")
-	privateKeyPath = flag.String("private-key", "private.key", "The path to the private key used for signing tokens")
-	publicKeyPath  = flag.String("public-key", "public.key", "The path to the public key used for verifying tokens")
+	configPath = flag.String("config", "auther.config.yaml", "The path to the configuration file")
 )
 
 func main() {
@@ -39,12 +37,12 @@ func main() {
 		log.Fatalf("could not open postgres connection: %s", err)
 	}
 
-	privateKey, err := LoadPrivateKey(*privateKeyPath)
+	privateKey, err := LoadPrivateKey(config.OIDC.PrivateKey)
 	if err != nil {
 		log.Fatalf("could not load private key: %s", err)
 	}
 
-	publicKey, err := LoadPublicKey(*publicKeyPath)
+	publicKey, err := LoadPublicKey(config.OIDC.PublicKey)
 	if err != nil {
 		log.Fatalf("could not load public key: %s", err)
 	}

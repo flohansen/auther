@@ -67,8 +67,14 @@ func (c PostgresConfig) Dsn() string {
 		c.Username, c.Password, c.Host, c.Port, c.Database, c.SSLMode)
 }
 
+type OIDCConfig struct {
+	PrivateKey string `yaml:"privateKey"`
+	PublicKey  string `yaml:"publicKey"`
+}
+
 type Config struct {
 	Postgres PostgresConfig `yaml:"postgres"`
+	OIDC     OIDCConfig     `yaml:"oidc"`
 }
 
 func LoadConfig(path string) (Config, error) {
