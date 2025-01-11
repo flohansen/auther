@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -22,6 +23,7 @@ import (
 var (
 	configPath     = flag.String("config", "auther.config.yaml", "The path to the configuration file")
 	privateKeyPath = flag.String("private-key", "private.key", "The path to the private key used for signing tokens")
+	publicKeyPath  = flag.String("public-key", "public.key", "The path to the public key used for verifying tokens")
 )
 
 func main() {
@@ -42,17 +44,25 @@ func main() {
 		log.Fatalf("could not load private key: %s", err)
 	}
 
+	publicKey, err := LoadPublicKey(*publicKeyPath)
+	if err != nil {
+		log.Fatalf("could not load public key: %s", err)
+	}
+
 	healthController := controller.NewHealthController()
 
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(privateKey, userRepository)
 	authController := controller.NewAuthController(userService)
+	keyService := service.NewKeyService(publicKey)
+	keyController := controller.NewKeyController(keyService)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthController.Healthz)
 	mux.HandleFunc("POST /api/v1/auth/register", authController.Register)
 	mux.HandleFunc("POST /api/v1/auth/login", authController.Login)
 	mux.HandleFunc("PUT /api/v1/auth/update", authController.Update)
+	mux.HandleFunc("GET /api/v1/auth/.well-known/jwks.json", keyController.JWKS)
 
 	if err := http.ListenAndServe(":3000", mux); err != nil {
 		log.Fatalf("error while listening and serving: %s", err)
@@ -72,4 +82,24 @@ func LoadPrivateKey(path string) (*ecdsa.PrivateKey, error) {
 	}
 
 	return pk, nil
+}
+
+func LoadPublicKey(path string) (*ecdsa.PublicKey, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not read file: %w", err)
+	}
+
+	block, _ := pem.Decode(b)
+	pk, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse private key: %w", err)
+	}
+
+	ecdsaPK, ok := pk.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, errors.New("key is not a ECDSA public key")
+	}
+
+	return ecdsaPK, nil
 }
