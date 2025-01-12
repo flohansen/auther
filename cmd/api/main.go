@@ -37,12 +37,12 @@ func main() {
 		log.Fatalf("could not open postgres connection: %s", err)
 	}
 
-	privateKey, err := LoadPrivateKey(config.OIDC.PrivateKey)
+	privateKey, err := loadPrivateKey(config.OIDC.PrivateKey)
 	if err != nil {
 		log.Fatalf("could not load private key: %s", err)
 	}
 
-	publicKey, err := LoadPublicKey(config.OIDC.PublicKey)
+	publicKey, err := loadPublicKey(config.OIDC.PublicKey)
 	if err != nil {
 		log.Fatalf("could not load public key: %s", err)
 	}
@@ -67,7 +67,7 @@ func main() {
 	}
 }
 
-func LoadPrivateKey(path string) (*ecdsa.PrivateKey, error) {
+func loadPrivateKey(path string) (*ecdsa.PrivateKey, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not read file: %w", err)
@@ -82,7 +82,7 @@ func LoadPrivateKey(path string) (*ecdsa.PrivateKey, error) {
 	return pk, nil
 }
 
-func LoadPublicKey(path string) (*ecdsa.PublicKey, error) {
+func loadPublicKey(path string) (*ecdsa.PublicKey, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not read file: %w", err)
