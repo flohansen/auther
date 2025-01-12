@@ -38,8 +38,8 @@ INSERT INTO users (username, password_hash, created_at, last_modified_at)
 VALUES ($1, $2, $3, $4)
 `
 
-func (u *UserRepository) CreateUser(ctx context.Context, user service.User) error {
-	_, err := u.db.ExecContext(ctx, createUserQuery, user.Username, user.PasswordHash, time.Now(), time.Now())
+func (r *UserRepository) CreateUser(ctx context.Context, user service.User) error {
+	_, err := r.db.ExecContext(ctx, createUserQuery, user.Username, user.PasswordHash, time.Now(), time.Now())
 	if err != nil {
 		switch true {
 		case strings.Contains(err.Error(), `duplicate key value violates unique constraint "users_pkey"`):
@@ -59,8 +59,8 @@ WHERE username = $1
 LIMIT 1
 `
 
-func (u *UserRepository) GetUser(ctx context.Context, username string) (service.User, error) {
-	row := u.db.QueryRowContext(ctx, getUserQuery, username)
+func (r *UserRepository) GetUser(ctx context.Context, username string) (service.User, error) {
+	row := r.db.QueryRowContext(ctx, getUserQuery, username)
 	if err := row.Err(); err != nil {
 		return service.User{}, fmt.Errorf("query error: %w", err)
 	}
@@ -83,4 +83,15 @@ func (u *UserRepository) GetUser(ctx context.Context, username string) (service.
 		Username:     user.Username,
 		PasswordHash: user.PasswordHash,
 	}, nil
+}
+
+const updateUserQuery = `
+UPDATE users
+SET password_hash = $2
+WHERE username = $1
+`
+
+func (r *UserRepository) UpdateUser(ctx context.Context, user service.User) error {
+	_, err := r.db.ExecContext(ctx, updateUserQuery, user.Username, user.PasswordHash)
+	return err
 }

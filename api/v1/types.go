@@ -48,6 +48,8 @@ type LoginResponse struct {
 }
 
 type UpdateRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type UpdateResponse struct {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	v1 "github.com/flohansen/auther/api/v1"
@@ -21,6 +22,7 @@ type Tokens struct {
 type UserService interface {
 	RegisterUser(ctx context.Context, req *v1.RegisterRequest) error
 	Authenticate(ctx context.Context, req *v1.LoginRequest) (Tokens, error)
+	UpdateUser(ctx context.Context, tokenString string, req *v1.UpdateRequest) error
 }
 
 type AuthController struct {
@@ -123,4 +125,21 @@ func validateLoginRequest(req *v1.LoginRequest) error {
 }
 
 func (c *AuthController) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req v1.UpdateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		v1.ErrorResponse(w, http.StatusBadRequest, "Request is not a valid json")
+		return
+	}
+
+	authorization := r.Header.Get("Authorization")
+	tokenString := strings.ReplaceAll(authorization, "Bearer ", "")
+
+	if err := c.userService.UpdateUser(ctx, tokenString, &req); err != nil {
+		v1.ErrorResponse(w, http.StatusUnauthorized, "Could not update user")
+		return
+	}
+
+	v1.SuccessResponse(w, "User updated")
 }

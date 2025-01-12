@@ -50,7 +50,7 @@ func main() {
 	healthController := controller.NewHealthController()
 
 	userRepository := repository.NewUserRepository(db)
-	userService := service.NewUserService(privateKey, userRepository)
+	userService := service.NewUserService(privateKey, publicKey, userRepository)
 	authController := controller.NewAuthController(userService)
 	keyService := service.NewKeyService(publicKey)
 	keyController := controller.NewKeyController(keyService)
