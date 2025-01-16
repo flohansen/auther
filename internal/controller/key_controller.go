@@ -40,7 +40,7 @@ func (c *KeyController) JWKS(w http.ResponseWriter, r *http.Request) {
 	jwks, err := c.keyService.GetJWKS()
 	if err != nil {
 		log.Printf("could not get JWKS: %s", err)
-		v1.ErrorResponse(w, http.StatusInternalServerError, "could not get JWKS")
+		v1.ErrorResponse(w, http.StatusInternalServerError, "Could not get JWKS")
 		return
 	}
 
