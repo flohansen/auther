@@ -60,6 +60,7 @@ func main() {
 	mux.HandleFunc("POST /api/v1/auth/register", authController.Register)
 	mux.HandleFunc("POST /api/v1/auth/login", authController.Login)
 	mux.HandleFunc("PUT /api/v1/auth/update", authController.Update)
+	mux.HandleFunc("POST /api/v1/auth/delete/{username}", authController.Delete)
 	mux.HandleFunc("GET /api/v1/auth/.well-known/jwks.json", keyController.JWKS)
 
 	if err := http.ListenAndServe(":3000", mux); err != nil {

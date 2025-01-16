@@ -23,6 +23,7 @@ type UserService interface {
 	RegisterUser(ctx context.Context, req *v1.RegisterRequest) error
 	Authenticate(ctx context.Context, req *v1.LoginRequest) (Tokens, error)
 	UpdateUser(ctx context.Context, tokenString string, req *v1.UpdateRequest) error
+	DeleteUser(ctx context.Context, tokenString string, username string) error
 }
 
 type AuthController struct {
@@ -142,4 +143,19 @@ func (c *AuthController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	v1.SuccessResponse(w, "User updated")
+}
+
+func (c *AuthController) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	username := r.PathValue("username")
+
+	authorization := r.Header.Get("Authorization")
+	tokenString := strings.ReplaceAll(authorization, "Bearer ", "")
+
+	if err := c.userService.DeleteUser(ctx, tokenString, username); err != nil {
+		v1.ErrorResponse(w, http.StatusUnauthorized, "Could not delete user")
+		return
+	}
+
+	v1.SuccessResponse(w, "User deleted")
 }

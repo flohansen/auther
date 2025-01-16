@@ -95,3 +95,14 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user service.User) erro
 	_, err := r.db.ExecContext(ctx, updateUserQuery, user.Username, user.PasswordHash)
 	return err
 }
+
+const deleteUserQuery = `
+DELETE FROM users
+WHERE username = $1
+LIMIT 1
+`
+
+func (r *UserRepository) DeleteUser(ctx context.Context, username string) error {
+	_, err := r.db.ExecContext(ctx, deleteUserQuery, username)
+	return err
+}

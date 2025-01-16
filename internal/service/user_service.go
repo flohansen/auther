@@ -28,6 +28,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user User) error
 	GetUser(ctx context.Context, username string) (User, error)
 	UpdateUser(ctx context.Context, user User) error
+	DeleteUser(ctx context.Context, username string) error
 }
 
 type UserService struct {
@@ -123,4 +124,24 @@ func (s *UserService) UpdateUser(ctx context.Context, tokenString string, req *v
 		Username:     req.Username,
 		PasswordHash: passwordHash,
 	})
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, tokenString string, username string) error {
+	var claims Claims
+	_, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+
+		return s.publicKey, nil
+	})
+	if err != nil {
+		return fmt.Errorf("could not parse token: %w", err)
+	}
+
+	if username != claims.Subject {
+		return errors.New("unauthorized")
+	}
+
+	return s.repo.DeleteUser(ctx, username)
 }
