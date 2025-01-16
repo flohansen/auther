@@ -289,6 +289,35 @@ func TestAuthController_Update(t *testing.T) {
 		assert.Equal(t, "Request is not a valid json", m["message"])
 	})
 
+	t.Run("should return 401 UNAUTHORIZED if update user failed", func(t *testing.T) {
+		// given
+		c := controller.NewAuthController(userServiceMock)
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("PUT", "/", bytes.NewReader([]byte(`{
+			"username": "username",
+			"password": "password"
+		}`)))
+		r.Header.Add("Authorization", "Bearer token")
+
+		userServiceMock.EXPECT().
+			UpdateUser(r.Context(), "token", &v1.UpdateRequest{
+				Username: "username",
+				Password: "password",
+			}).
+			Return(errors.New("error"))
+
+		// when
+		c.Update(w, r)
+
+		// then
+		res := w.Result()
+
+		var m map[string]any
+		assert.NoError(t, json.NewDecoder(res.Body).Decode(&m))
+		assert.Equal(t, 401, res.StatusCode)
+		assert.Equal(t, "Could not update user", m["message"])
+	})
+
 	t.Run("should return 200 OK", func(t *testing.T) {
 		// given
 		c := controller.NewAuthController(userServiceMock)
@@ -322,6 +351,33 @@ func TestAuthController_Update(t *testing.T) {
 func TestAuthController_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	userServiceMock := mocks.NewMockUserService(ctrl)
+
+	t.Run("should return 401 UNAUTHORIZED if deleting user failed", func(t *testing.T) {
+		// given
+		c := controller.NewAuthController(userServiceMock)
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("PUT", "/", bytes.NewReader([]byte(`{
+			"username": "username",
+			"password": "password"
+		}`)))
+		r.Header.Add("Authorization", "Bearer token")
+		r.SetPathValue("username", "username")
+
+		userServiceMock.EXPECT().
+			DeleteUser(r.Context(), "token", "username").
+			Return(errors.New("error"))
+
+		// when
+		c.Delete(w, r)
+
+		// then
+		res := w.Result()
+
+		var m map[string]any
+		assert.NoError(t, json.NewDecoder(res.Body).Decode(&m))
+		assert.Equal(t, 401, res.StatusCode)
+		assert.Equal(t, "Could not delete user", m["message"])
+	})
 
 	t.Run("should return 200 OK", func(t *testing.T) {
 		// given
